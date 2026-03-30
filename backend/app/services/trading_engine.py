@@ -48,8 +48,8 @@ async def _get_connector(user_id: str, db: AsyncSession) -> BrokerConnector:
         return _connectors[user_id]
     result = await db.execute(select(LinkedAccount).where(LinkedAccount.user_id == user_id))
     account = result.scalar_one_or_none()
-    import os
-    metaapi_token = os.environ.get("METAAPI_TOKEN", "")
+    from app.config import get_settings
+    metaapi_token = get_settings().metaapi_token or __import__("os").environ.get("METAAPI_TOKEN", "")
     if account and metaapi_token:
         connector: BrokerConnector = MetaApiConnector()
         try:

@@ -163,13 +163,14 @@ class MetaApiConnector(BrokerConnector):
         try:
             from metaapi_cloud_sdk import MetaApi
             import os
-            self._api_token = os.environ.get("METAAPI_TOKEN", "")
+            from app.config import get_settings
+            self._api_token = get_settings().metaapi_token or os.environ.get("METAAPI_TOKEN", "")
             if not self._api_token:
                 return False
             self._api = MetaApi(self._api_token)
             accounts = await self._api.metatrader_account_api.get_accounts_with_infinite_scroll_pagination()
             # Find existing account or create new one
-            existing = next((a for a in accounts if a.login == account and a.type == "cloud"), None)
+            existing = next((a for a in accounts if str(a.login) == str(account)), None)
             if existing:
                 self._account = existing
             else:
